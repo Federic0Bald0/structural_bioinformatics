@@ -1,4 +1,24 @@
 # coding: utf-8
+import pymol
+
+from uuid import uuid4
+
+from Bio.PDB import Select
+
+from pymol import cmd
+from pymol.cgo import *
+
+
+class UnitSelection(Select):
+    def __init__(self, start_id, end_id):
+        self.start_id = start_id
+        self.end_id = end_id
+
+    def accept_residue(self, residue):
+        hetflag, resseq, icode = residue.get_id()
+        if self.start_id <= resseq <= self.end_id:
+            return True
+        return False
 
 
 def parse_rdb(filename):
@@ -37,15 +57,57 @@ def parse_rdb(filename):
                 obj.setdefault('insertions', [])
                 obj['insertions'].append((line[1], line[2]))
 
-    for i, unit in enumerate(obj['units']):
-        print "Unit {:<5} {}".format(i, unit)
-
-    # for i, unit in enumerate(obj['insertions']):
-    #     print "Insertion {:<5} {}".format(i, unit)
-
     return obj
 
+ 
+def draw_center_of_mass(centers):
+    for unit in centers:
+        pymol_center = [COLOR, 255, 0, 0, SPHERE] + list(centers[unit]) + [0.5]
+        cmd.load_cgo(pymol_center, 'center' + unit)
 
-# if __name__ == "__main__":
-#     db_f = 'data/rdb/2z7xb.db'
-#     print parse_rdb(db_f)
+    
+def draw_distance_center_of_mass(centers):
+    for unit_1 in centers:
+        center_1 = centers[unit_1]
+        pymol.cmd.pseudoatom('center' + unit_1,
+                             pos=[center_1[0], center_1[1], center_1[2]],
+                             color="red", 
+                             name='center_1')
+        for unit_2 in centers:
+            if unit_1 != unit_2:
+                center_2 = centers[unit_2]
+                pymol.cmd.pseudoatom('center' + unit_2,
+                                     pos=[center_2[0], center_2[1], center_2[2]],
+                                     color="red", 
+                                     name='center_2')
+                pymol.cmd.distance('center' + unit_1 + '////center_1',
+                                   'center' + unit_2 + '////center_2')
+
+                            
+def draw_distance_center_mass_alpha(unit, center, alpha_c):
+    cmd.pseudoatom('center' + unit,
+                   pos=[center[0], center[1], center[2]],
+                   color="red", 
+                   name='center')
+    for i, c in enumerate(alpha_c):
+        coord = c.get_coord()
+        cmd.pseudoatom('c_alpha' + unit + str(i),
+                       pos=[coord[0], coord[1], coord[2]],
+                       color="red", 
+                       name='c_alpha')
+        cmd.distance('center' + unit + '////center',
+                     'c_alpha' + unit + str(i) + '////c_alpha') 
+
+
+def draw_vector(x, y):
+    id_ = str(uuid4())
+    cmd.pseudoatom('vx' + id_, 
+                   pos=x, 
+                   color="red", 
+                   name='x')
+    cmd.pseudoatom('vy' + id_, 
+                   pos=y, 
+                   color="red", 
+                   name='y')
+    cmd.distance('vx' + id_ + '////x',
+                 'vy' + id_ + '////y')

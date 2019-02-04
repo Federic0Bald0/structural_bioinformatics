@@ -1,6 +1,6 @@
 # coding: utf-8
 
-import compute_geometry
+import bio_project.compute_geometry as compute_geometry
 
 from PyInquirer import style_from_dict, Token, prompt
 from PyInquirer import Validator, ValidationError
@@ -24,8 +24,8 @@ style = style_from_dict({
     Token.Question: '',
 })
 
-print ('Answer the question below to set the evaluation and visualization \
-        paramenter for the protein')
+print('Answer the question below to set the evaluation and visualization \
+      paramenter for the protein')
 
 questions = [
 
@@ -80,41 +80,48 @@ questions = [
         'message': 'Do you want to visualize the results in json format?',
         'default': False
     },
+    {   
+        'type': 'confirm',
+        'name': 'draw',
+        'message': 'Do you want to visualize the results with pymol?',
+        'default': False
+    },
 
 ]
 
+
 answers = prompt(questions, style=style)
 
-centers = compute_geometry.center_mass_unit()
+centers = compute_geometry.center_mass_unit(answers['draw'])
 
 if answers['center_of_mass']:
     if answers['json']:
-        print centers 
+        print(centers)
 
 if answers['center_of_mass_distance']:
-    ris = compute_geometry.distance_center_of_mass(centers)
+    ris = compute_geometry.distance_center_of_mass(centers, answers['draw'])
     if answers['json']: 
-        print ris 
+        print(ris) 
 
 if answers['c_alpha_distance']:
-    ris = compute_geometry.distance_alpha_c(centers)
+    ris = compute_geometry.distance_alpha_c(centers, answers['draw'])
     if answers['json']:
-        print ris 
+        print(ris) 
 
 if answers['handedness']:
-    ris = compute_geometry.handedness(centers)
+    ris = compute_geometry.handedness(centers, answers['draw'])
     if answers['json']:
-        print ris 
+        print(ris) 
 
 if answers['twist']:
-    ris = compute_geometry.twist(centers)
+    ris = compute_geometry.twist(centers, answers['draw'])
     if answers['json']:
-        print ris 
+        print(ris)
 
 if answers['curvature'] or answers['pitch']:
-    ris_c, ris_p = compute_geometry.curvature_pitch(centers)
+    ris_c, ris_p = compute_geometry.curvature_pitch(centers, answers['draw'])
     if answers['json'] and answers['curvature']:
-        print ris_c 
+        print(ris_c)
     if answers['json'] and answers['pitch']:
-        print ris_p 
+        print(ris_p) 
 
