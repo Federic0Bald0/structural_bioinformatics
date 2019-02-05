@@ -1,39 +1,36 @@
 # coding: utf-8
 
-import unittest
+from unittest import TestCase
 
 import bio_project.compute_geometry as compute_geometry
 
-
-def test_center_of_mass():
-    atom_1 = (7, 10, 22)
-    mass_1 = 22.3
-    atom_2 = (12, 2, 14)
-    mass_2 = 2.5
-    atom_3 = (0, 5, 80)
-    mass_3 = 50.5
-
-    compute_geometry.center_mass_unit
-
-def test_distance_center_of_mass():
-    pass
+unit_test_dir = "data/test_unit/"
 
 
-def test_distance_alpha_c():
-    pass
+class TestGeometry(TestCase):
 
+    def test_center_of_mass(self): 
+        ris = compute_geometry.center_mass_unit(False, unit_test_dir)
+        print(ris)
+        self.assertEquals(ris, 3)
 
-def test_handedness():
-    pass
+    def test_distance_center_of_mass(self):
+        pass
 
+    def test_distance_alpha_c(self):
+        pass
 
-def test_twist():
-    pass
+    def test_handedness(self):
+        pass
 
+    def test_twist(self):
+        pass
 
-def test_curvature():
-    pass
+    def test_curvature(self):
+        pass
 
+    def test_pitch(self):
+        pass
 
-def test_pitch():
-    pass
+ts = TestGeometry()
+ts.test_center_of_mass()
