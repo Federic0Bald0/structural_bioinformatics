@@ -286,7 +286,7 @@ def aux(i, centers, draw):
     pdb_parser = PDBParser()
     structure_1 = pdb_parser.get_structure(unit_1, unit_dir + unit_1)
     center_1 = np.array(centers[unit_1])
-    ca_1 = np.array(alpha_carbon(structure_1)[0].get_coord())
+    ca_1 = np.array(alpha_carbon(structure_1)[0].get_coord()) # RIVEDI
     structure_2 = pdb_parser.get_structure(unit_2, unit_dir + unit_2)
     center_2 = np.array(centers[unit_2])
     structure_3 = pdb_parser.get_structure(unit_3, unit_dir + unit_3)
