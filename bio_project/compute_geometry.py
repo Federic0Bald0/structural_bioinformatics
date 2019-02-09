@@ -20,17 +20,16 @@ TODO
 
 descrivere meglio AUX
 
-rivedere handedness
-
 """
 
 
-def center_mass_unit(draw, unit_dir):
+def center_mass_unit(draw):
     """
     compute center of mass for each unit
 
-    draw: boolean, if True pymol is used to draw the respective geometric
-          element
+    :param draw: boolean, if True pymol is used to draw the respective 
+                 geometric element
+    :return: dictionary containing coordinates of the centers of mass
     """
     centers = {}  # dict containing center of mass coordinates
     for unit in unit_dir_list:
@@ -60,13 +59,14 @@ def center_mass_unit(draw, unit_dir):
     return centers
 
 
-def distance_center_of_mass(centers, draw, unit_dir):
+def distance_center_of_mass(centers, draw):
     """
     compute distance between each center of mass
 
-    centers: list of coordinates of the centers of mass for each unit
-    draw: boolean, if True pymol is used to draw the respective geometric
-          element
+    :param centers: list of coordinates of the centers of mass for each unit
+    :param draw: boolean, if True pymol is used to draw the respective 
+                 geometric element
+    :return: dictionary containig distances between center of mass
     """
     distances = {}
     for i in range(len(centers)):
@@ -85,14 +85,15 @@ def distance_center_of_mass(centers, draw, unit_dir):
     return distances
 
 
-def distance_alpha_c(centers, draw, unit_dir):
+def distance_alpha_c(centers, draw):
     """
     compute the distance between center of mass and each alpha carbon 
     in the corresponding unit 
 
-    centers: list of coordinates of the centers of mass for each unit
-    draw: boolean, if True pymol is used to draw the respective geometric
-          element
+    :param centers: list of coordinates of the centers of mass for each unit
+    :param draw: boolean, if True pymol is used to draw the respective 
+                 geometric element
+    :return: dictionary of the distaces between center of mass and alpha carbon
     """
     distances = {}
     for unit in unit_dir_list:
@@ -112,16 +113,17 @@ def distance_alpha_c(centers, draw, unit_dir):
     return distances
 
 
-def handedness(centers, draw, unit_dir):
+def handedness(centers, draw):
     """
     compute the handeness (Left or Right) of each unit 
 
-    centers: list of coordinates of the centers of mass for each unit
-    draw: boolean, if True pymol is used to draw the respective geometric
-          element
+    :param centers: list of coordinates of the centers of mass for each unit
+    :param draw: boolean, if True pymol is used to draw the respective 
+                 geometric element
+    :return: dictionary containing the handedness for each unit
     """
     handedness = {}
-    for i in range(len(centers)-1):
+    for i in range(len(centers)):
         unit = unit_dir_list[i]
         pdb_parser = PDBParser()
         structure = pdb_parser.get_structure(unit, unit_dir + unit)
@@ -133,7 +135,7 @@ def handedness(centers, draw, unit_dir):
         z = np.array(centers[unit])
         if i != len(centers)-1:
             z = z + np.array(centers[unit_dir_list[i+1]]) 
-        if i == len(centers):
+        if i == len(centers)-1:
             z = 1 - (z + np.array(centers[unit_dir_list[i-1]]))
         y = np.cross(z, v_1)
         v_1_trans = np.linalg.solve(np.array([v_1, y, z]).T, v_1)
@@ -147,20 +149,20 @@ def handedness(centers, draw, unit_dir):
 
         # drawing vector used to compute handedness
         if draw:
-            # RIVEDERE
             utils.draw_vector(list(ca_1.get_coord()), list(centers[unit]))
             utils.draw_vector(list(ca_2.get_coord()), list(centers[unit]))
 
     return handedness
 
 
-def twist(centers, draw, unit_dir):
+def twist(centers, draw):
     """
     compute the rotation between units
 
-    centers: list of coordinates of the centers of mass for each unit
-    draw: boolean, if True pymol is used to draw the respective geometric
-          element
+    :param centers: list of coordinates of the centers of mass for each unit
+    :param draw: boolean, if True pymol is used to draw the respective 
+                 geometric element
+    :return: dictionary containing twist between units
     """
     twist = {}
     for i in range(len(centers)-1):
@@ -196,14 +198,15 @@ def twist(centers, draw, unit_dir):
     return twist
 
 
-def pitch(centers, draw, unit_dir):
+def pitch(centers, draw):
     """
     compute the pitch of the protein, vertical angle between vectors
     connecting units
 
-    centers: list of coordinates of the centers of mass for each unit
-    draw: boolean, if True pymol is used to draw the respective geometric
-          element
+    :param centers: list of coordinates of the centers of mass for each unit
+    :param draw: boolean, if True pymol is used to draw the respective
+                 geometric element
+    :return: dictionary containing pitch
     """
     pitch = {}
     for i in range(len(centers)-2):
@@ -214,14 +217,15 @@ def pitch(centers, draw, unit_dir):
     return pitch
 
 
-def curvature(centers, draw, unit_dir):
+def curvature(centers, draw):
     """
     compute the curvature of the protein, horizontal angle between vectors
     connecting units
 
-    centers: list of coordinates of the centers of mass for each unit
-    draw: boolean, if True pymol is used to draw the respective geometric
-          element
+    :param centers: list of coordinates of the centers of mass for each unit
+    :param draw: boolean, if True pymol is used to draw the respective
+                 geometric element
+    :return: dictionary containing curvature
     """
     curvature = {}
     for i in range(len(centers)-2):
@@ -238,10 +242,11 @@ def curvature(centers, draw, unit_dir):
 
 def distance(coord_1, coord_2):
     """
-    compute the distance between two points
+    compute the euclidean distance between two points
 
-    coord_1: coordinates first point 
-    coord_2: coordinates second point
+    :param coord_1: coordinates first point 
+    :param coord_2: coordinates second point
+    :return: distance between two points
     """
     return math.sqrt((coord_1[0] - coord_2[0])**2 +
                      (coord_1[1] - coord_2[1])**2 +
@@ -252,8 +257,9 @@ def angle(x, y):
     """
     compute the angle (in degrees) between two vectors 
 
-    x: first vector
-    y: second vector
+    :param x: first vector
+    :param y: second vector
+    :return: angle in degrees between two vectors
     """
     dot = np.dot(x, y)
     mag_x = np.linalg.norm(x)
@@ -266,19 +272,23 @@ def alpha_carbon(structure):
     """
     retrieve all the alpha carbon from the unit structure
 
-    structure: bio python unit structure
+    :param structure: bio python unit structure
+    :return: list of alpha carbon cointained in the structure
     """
     return [atom for atom in structure.get_atoms() if atom.get_name() == 'CA']
 
 
 def aux(i, centers, draw):
     """
-    axiliary function to compute pitch and curvature....
+    axiliary function, transforms vectors used to compute pitch and curvature,
+    in order to have comparable arrays
 
-    i: number used to identify the set of unit used
-    centers: list of coordinates of the centers of mass for each unit
-    draw: boolean, if True pymol is used to draw the respective geometric
-          element
+    :param i: number used to identify the set of unit used
+    :param centers: list of coordinates of the centers of mass for each unit
+    :param draw: boolean, if True pymol is used to draw the respective
+                 geometric element
+    :return: 3 vector transposed according to a coordinate system that allows
+             them to be compared
     """
     unit_1 = unit_dir_list[i]
     unit_2 = unit_dir_list[i+1]
@@ -286,23 +296,28 @@ def aux(i, centers, draw):
     pdb_parser = PDBParser()
     structure_1 = pdb_parser.get_structure(unit_1, unit_dir + unit_1)
     center_1 = np.array(centers[unit_1])
-    ca_1 = np.array(alpha_carbon(structure_1)[0].get_coord()) # RIVEDI
+    ca_1 = np.array(alpha_carbon(structure_1)[-1].get_coord())  
     structure_2 = pdb_parser.get_structure(unit_2, unit_dir + unit_2)
     center_2 = np.array(centers[unit_2])
     structure_3 = pdb_parser.get_structure(unit_3, unit_dir + unit_3)
     center_3 = np.array(centers[unit_3])
 
     v_1 = ca_1 - center_1
+    # v_1 /= np.linalg.norm(v_1)
     v_2 = center_2 - center_1
+    # v_2 /= np.linalg.norm(v_2)
     v_3 = center_3 - center_2
+    # v_3 /= np.linalg.norm(v_3)
     v_4 = np.cross(v_1, v_2)
+    # v_4 /= np.linalg.norm(v_4)
 
     v_1_trans = np.linalg.solve(np.array([v_1, v_2, v_4]), v_1)
+    # v_1_trans /= np.linalg.norm(v_1_trans)
     v_2_trans = np.linalg.solve(np.array([v_1, v_2, v_4]), v_2)
+    # v_2_trans /= np.linalg.norm(v_2_trans)
     v_3_trans = np.linalg.solve(np.array([v_1, v_2, v_4]), v_3)
-
+    # v_3_trans /= np.linalg.norm(v_3_trans)
     if draw:
-        # RIVEDI
         utils.draw_vector(list(center_1), list(ca_1))
         utils.draw_vector(list(center_1), list(center_2))
         utils.draw_vector(list(center_2), list(center_3))

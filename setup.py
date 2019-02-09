@@ -1,10 +1,9 @@
 from setuptools import setup, find_packages
 from os import path
-from io import open
 
 here = path.abspath(path.dirname(__file__))
 # Get the long description from the README file
-with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+with open(path.join(here, 'README.md'), 'r') as f:
     long_description = f.read()
 
 setup(
@@ -19,6 +18,7 @@ setup(
         'Programming Language :: Python :: 2.7'
     ],
     author_email='federico.baldo.1@studenti.unipd.it',
+    packages=find_packages(),
     install_requires=["biopython", "numpy", "pymol", "pyinquirer"],
     python_requires='>=2.7',
     entry_points={  

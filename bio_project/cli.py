@@ -18,15 +18,6 @@ from PyInquirer import Validator, ValidationError
 
 warnings.simplefilter('ignore', PDBConstructionWarning)
 
-"""
-TODO
-
-beatify json print
-
-review correctness questions
-
-"""
-
 pdb_f = "data/2z7x.pdb"
 rdb_f = "data/rdb/2z7xb.db"
 unit_dir = "data/unit/"
@@ -127,41 +118,39 @@ if answers['draw']:
     for unit in os.listdir(unit_dir):
         pymol.cmd.load(unit_dir + unit, unit)
 
-centers = compute_geometry.center_mass_unit(answers['draw'], unit_dir)
+centers = compute_geometry.center_mass_unit(answers['draw'])
 
 if answers['center_of_mass']:
     if answers['json']:
         print(json.dumps(centers, indent=4, sort_keys=True))
 
 if answers['center_of_mass_distance']:
-    ris = compute_geometry.distance_center_of_mass(centers,
-                                                   answers['draw'],
-                                                   unit_dir)
+    ris = compute_geometry.distance_center_of_mass(centers, answers['draw'])
     if answers['json']: 
         print(json.dumps(ris, indent=4, sort_keys=True)) 
 
 if answers['c_alpha_distance']:
-    ris = compute_geometry.distance_alpha_c(centers, answers['draw'], unit_dir)
+    ris = compute_geometry.distance_alpha_c(centers, answers['draw'])
     if answers['json']:
         print(json.dumps(ris, indent=4, sort_keys=True)) 
 
 if answers['handedness']:
-    ris = compute_geometry.handedness(centers, answers['draw'], unit_dir)
+    ris = compute_geometry.handedness(centers, answers['draw'])
     if answers['json']:
         print(json.dumps(ris, indent=4, sort_keys=True)) 
 
 if answers['twist']:
-    ris = compute_geometry.twist(centers, answers['draw'], unit_dir)
+    ris = compute_geometry.twist(centers, answers['draw'])
     if answers['json']:
         print(json.dumps(ris, indent=4, sort_keys=True))
 
 if answers['curvature']:
-    ris = compute_geometry.curvature(centers, answers['draw'], unit_dir)
+    ris = compute_geometry.curvature(centers, answers['draw'])
     if answers['json']:
         print(json.dumps(ris, indent=4, sort_keys=True))
 
 if answers['pitch']: 
-    ris = compute_geometry.pitch(centers, answers['draw'], unit_dir)
+    ris = compute_geometry.pitch(centers, answers['draw'])
     if answers['json']:
         print(json.dumps(ris, indent=4, sort_keys=True)) 
 
