@@ -1,7 +1,7 @@
 # coding: utf-8
 import os 
 import math
-import pymol
+# import pymol
 
 import numpy as np
 
@@ -10,20 +10,7 @@ from Bio.PDB.PDBParser import PDBParser
 import bio_project.utils as utils
 
 
-unit_dir = "data/unit/"
-unit_dir_list = os.listdir(unit_dir)
-unit_dir_list.sort(key=utils.natural_keys)
-
-"""
-
-TODO 
-
-descrivere meglio AUX
-
-"""
-
-
-def center_mass_unit(draw):
+def center_mass_unit(draw, unit_dir):
     """
     compute center of mass for each unit
 
@@ -31,7 +18,9 @@ def center_mass_unit(draw):
                  geometric element
     :return: dictionary containing coordinates of the centers of mass
     """
-    centers = {}  # dict containing center of mass coordinates
+    unit_dir_list = os.listdir(unit_dir)
+    unit_dir_list.sort(key=utils.natural_keys) 
+    centers = {}  
     for unit in unit_dir_list:
         pdb_parser = PDBParser()
         structure = pdb_parser.get_structure(unit, unit_dir + unit)
@@ -53,13 +42,13 @@ def center_mass_unit(draw):
         centers[unit] = (x, y, z)
 
         # drawing center of mass
-        if draw:
-            utils.draw_center_of_mass(centers)
+        # if draw:
+        #     utils.draw_center_of_mass(centers)
 
     return centers
 
 
-def distance_center_of_mass(centers, draw):
+def distance_center_of_mass(centers, draw, unit_dir):
     """
     compute distance between each center of mass
 
@@ -68,6 +57,8 @@ def distance_center_of_mass(centers, draw):
                  geometric element
     :return: dictionary containig distances between center of mass
     """
+    unit_dir_list = os.listdir(unit_dir)
+    unit_dir_list.sort(key=utils.natural_keys) 
     distances = {}
     for i in range(len(centers)):
         unit_1 = unit_dir_list[i]
@@ -79,13 +70,13 @@ def distance_center_of_mass(centers, draw):
                                                      centers[unit_2])
 
     # drawing distances
-    if draw:
-        utils.draw_distance_center_of_mass(centers)
+    # if draw:
+    #     utils.draw_distance_center_of_mass(centers)
 
     return distances
 
 
-def distance_alpha_c(centers, draw):
+def distance_alpha_c(centers, draw, unit_dir):
     """
     compute the distance between center of mass and each alpha carbon 
     in the corresponding unit 
@@ -95,6 +86,8 @@ def distance_alpha_c(centers, draw):
                  geometric element
     :return: dictionary of the distaces between center of mass and alpha carbon
     """
+    unit_dir_list = os.listdir(unit_dir)
+    unit_dir_list.sort(key=utils.natural_keys) 
     distances = {}
     for unit in unit_dir_list:
         pdb_parser = PDBParser()
@@ -107,13 +100,13 @@ def distance_alpha_c(centers, draw):
                                                              center)
 
         # drawing distances
-        if draw:
-            utils.draw_distance_center_mass_alpha(unit, center, alpha_c)
+        # if draw:
+        #     utils.draw_distance_center_mass_alpha(unit, center, alpha_c)
 
     return distances
 
 
-def handedness(centers, draw):
+def handedness(centers, draw, unit_dir):
     """
     compute the handeness (Left or Right) of each unit 
 
@@ -122,6 +115,8 @@ def handedness(centers, draw):
                  geometric element
     :return: dictionary containing the handedness for each unit
     """
+    unit_dir_list = os.listdir(unit_dir)
+    unit_dir_list.sort(key=utils.natural_keys) 
     handedness = {}
     for i in range(len(centers)):
         unit = unit_dir_list[i]
@@ -132,12 +127,12 @@ def handedness(centers, draw):
         ca_2 = alpha_c[1]
         v_1 = np.array(ca_1.get_coord()) - np.array(centers[unit])
         v_2 = np.array(ca_2.get_coord()) - np.array(centers[unit])
-        z = np.array(centers[unit])
+        y = np.array(centers[unit])
         if i != len(centers)-1:
-            z = z + np.array(centers[unit_dir_list[i+1]]) 
+            y = y + np.array(centers[unit_dir_list[i+1]]) 
         if i == len(centers)-1:
-            z = 1 - (z + np.array(centers[unit_dir_list[i-1]]))
-        y = np.cross(z, v_1)
+            y = 1 - (y + np.array(centers[unit_dir_list[i-1]]))
+        z = np.cross(y, v_1)
         v_1_trans = np.linalg.solve(np.array([v_1, y, z]).T, v_1)
         v_2_trans = np.linalg.solve(np.array([v_1, y, z]).T, v_2)
         hand = np.cross(v_1_trans, v_2_trans)[2]
@@ -148,14 +143,14 @@ def handedness(centers, draw):
             handedness[unit] = "L"
 
         # drawing vector used to compute handedness
-        if draw:
-            utils.draw_vector(list(ca_1.get_coord()), list(centers[unit]))
-            utils.draw_vector(list(ca_2.get_coord()), list(centers[unit]))
+        # if draw:
+        #     utils.draw_vector(list(ca_1.get_coord()), list(centers[unit]))
+        #     utils.draw_vector(list(ca_2.get_coord()), list(centers[unit]))
 
     return handedness
 
 
-def twist(centers, draw):
+def twist(centers, draw, unit_dir):
     """
     compute the rotation between units
 
@@ -164,6 +159,8 @@ def twist(centers, draw):
                  geometric element
     :return: dictionary containing twist between units
     """
+    unit_dir_list = os.listdir(unit_dir)
+    unit_dir_list.sort(key=utils.natural_keys) 
     twist = {}
     for i in range(len(centers)-1):
         unit_1 = unit_dir_list[i]
@@ -190,15 +187,15 @@ def twist(centers, draw):
         twist[unit_1] = angle
 
         #  drawing vector used to compute twist
-        if draw:
-            utils.draw_vector(list(ca_1), list(ca_2))
-            utils.draw_vector(list(center_1), list(ca_1))
-            utils.draw_vector(list(center_2), list(ca_2))
+        # if draw:
+        #     utils.draw_vector(list(ca_1), list(ca_2))
+        #     utils.draw_vector(list(center_1), list(ca_1))
+        #     utils.draw_vector(list(center_2), list(ca_2))
 
     return twist
 
 
-def pitch(centers, draw):
+def pitch(centers, draw, unit_dir):
     """
     compute the pitch of the protein, vertical angle between vectors
     connecting units
@@ -208,16 +205,18 @@ def pitch(centers, draw):
                  geometric element
     :return: dictionary containing pitch
     """
+    unit_dir_list = os.listdir(unit_dir)
+    unit_dir_list.sort(key=utils.natural_keys) 
     pitch = {}
     for i in range(len(centers)-2):
-        v_1, v_2, v_3 = aux(i, centers, draw)
-        pitch[unit_dir_list[i]] = (angle(v_1, v_3) - 
-                                   angle(v_1, v_2))
+        v_1, v_2, v_3 = aux(i, centers, draw, unit_dir)
+        pitch[unit_dir_list[i] + '_' + unit_dir_list[i+1]] = (angle(v_1, v_3) - 
+                                                              angle(v_1, v_2))
 
     return pitch
 
 
-def curvature(centers, draw):
+def curvature(centers, draw, unit_dir):
     """
     compute the curvature of the protein, horizontal angle between vectors
     connecting units
@@ -227,10 +226,12 @@ def curvature(centers, draw):
                  geometric element
     :return: dictionary containing curvature
     """
+    unit_dir_list = os.listdir(unit_dir)
+    unit_dir_list.sort(key=utils.natural_keys) 
     curvature = {}
     for i in range(len(centers)-2):
-        v_1, v_2, v_3 = aux(i, centers, draw)
-        curvature[unit_dir_list[i]] = angle(v_2, v_3)
+        v_1, v_2, v_3 = aux(i, centers, draw, unit_dir)
+        curvature[unit_dir_list[i] + '_' + unit_dir_list[i+1]] = angle(v_2, v_3)
 
     return curvature
 
@@ -262,9 +263,9 @@ def angle(x, y):
     :return: angle in degrees between two vectors
     """
     dot = np.dot(x, y)
-    mag_x = np.linalg.norm(x)
-    mag_y = np.linalg.norm(y)
-    temp_angle = dot/(mag_x*mag_y)
+    norm_x = np.linalg.norm(x)
+    norm_y = np.linalg.norm(y)
+    temp_angle = dot/(norm_x*norm_y)
     return np.degrees(np.arccos(temp_angle))
 
 
@@ -278,7 +279,7 @@ def alpha_carbon(structure):
     return [atom for atom in structure.get_atoms() if atom.get_name() == 'CA']
 
 
-def aux(i, centers, draw):
+def aux(i, centers, draw, unit_dir):
     """
     axiliary function, transforms vectors used to compute pitch and curvature,
     in order to have comparable arrays
@@ -290,6 +291,8 @@ def aux(i, centers, draw):
     :return: 3 vector transposed according to a coordinate system that allows
              them to be compared
     """
+    unit_dir_list = os.listdir(unit_dir)
+    unit_dir_list.sort(key=utils.natural_keys) 
     unit_1 = unit_dir_list[i]
     unit_2 = unit_dir_list[i+1]
     unit_3 = unit_dir_list[i+2]
@@ -302,24 +305,24 @@ def aux(i, centers, draw):
     structure_3 = pdb_parser.get_structure(unit_3, unit_dir + unit_3)
     center_3 = np.array(centers[unit_3])
 
-    v_1 = ca_1 - center_1
+    x = ca_1 - center_1
     # v_1 /= np.linalg.norm(v_1)
-    v_2 = center_2 - center_1
+    y = center_2 - center_1
     # v_2 /= np.linalg.norm(v_2)
-    v_3 = center_3 - center_2
+    v = center_3 - center_2
     # v_3 /= np.linalg.norm(v_3)
-    v_4 = np.cross(v_1, v_2)
+    z = np.cross(x, y)
     # v_4 /= np.linalg.norm(v_4)
 
-    v_1_trans = np.linalg.solve(np.array([v_1, v_2, v_4]), v_1)
+    x_trans = np.linalg.solve(np.array([x, y, z]), x)
     # v_1_trans /= np.linalg.norm(v_1_trans)
-    v_2_trans = np.linalg.solve(np.array([v_1, v_2, v_4]), v_2)
+    y_trans = np.linalg.solve(np.array([x, y, z]), y)
     # v_2_trans /= np.linalg.norm(v_2_trans)
-    v_3_trans = np.linalg.solve(np.array([v_1, v_2, v_4]), v_3)
+    v_trans = np.linalg.solve(np.array([x, y, z]), v)
     # v_3_trans /= np.linalg.norm(v_3_trans)
-    if draw:
-        utils.draw_vector(list(center_1), list(ca_1))
-        utils.draw_vector(list(center_1), list(center_2))
-        utils.draw_vector(list(center_2), list(center_3))
+    # if draw:
+    #     utils.draw_vector(list(center_1), list(ca_1))
+    #     utils.draw_vector(list(center_1), list(center_2))
+    #     utils.draw_vector(list(center_2), list(center_3))
 
-    return v_1_trans, v_2_trans, v_3_trans
+    return x_trans, y_trans, v_trans

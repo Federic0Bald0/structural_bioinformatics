@@ -1,7 +1,7 @@
 # coding: utf-8
 import os
 import json
-import pymol
+# import pymol
 import warnings
 
 from Bio.PDB import PDBIO
@@ -21,7 +21,8 @@ warnings.simplefilter('ignore', PDBConstructionWarning)
 pdb_f = "data/2z7x.pdb"
 rdb_f = "data/rdb/2z7xb.db"
 unit_dir = "data/unit/"
-
+unit_dir_list = os.listdir(unit_dir)
+unit_dir_list.sort(key=utils.natural_keys) 
 # parsing RDB protein file 
 parsed_rdb_protein = parse_rdb(rdb_f)
 # selecting and saving units of the rdb protein 
@@ -112,13 +113,13 @@ questions = [
 
 answers = prompt(questions, style=style)
 
-if answers['draw']:
-    # pymol
-    pymol.finish_launching()
-    for unit in os.listdir(unit_dir):
-        pymol.cmd.load(unit_dir + unit, unit)
+# if answers['draw']:
+#     # pymol
+#     pymol.finish_launching()
+#     for unit in os.listdir(unit_dir):
+#         pymol.cmd.load(unit_dir + unit, unit)
 
-centers = compute_geometry.center_mass_unit(answers['draw'])
+centers = compute_geometry.center_mass_unit(answers['draw'], unit_dir)
 
 if answers['center_of_mass']:
     if answers['json']:
