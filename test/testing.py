@@ -108,7 +108,8 @@ class TestGeometry(TestCase):
         ris = compute_geometry.twist(centers,
                                      False,
                                      unit_test_dir)
-        self.assertEquals(ris['unit_27-48.pdb'], 0.9309720264364901)
+        self.assertEquals(ris['unit_27-48.pdb_unit_49-72.pdb'],
+                          0.9309720264364901)
 
     def test_pitch(self):
         """

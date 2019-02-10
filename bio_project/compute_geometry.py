@@ -1,7 +1,7 @@
 # coding: utf-8
 import os 
 import math
-# import pymol
+import pymol
 
 import numpy as np
 
@@ -42,8 +42,8 @@ def center_mass_unit(draw, unit_dir):
         centers[unit] = (x, y, z)
 
         # drawing center of mass
-        # if draw:
-        #     utils.draw_center_of_mass(centers)
+        if draw:
+            utils.draw_center_of_mass(centers)
 
     return centers
 
@@ -70,8 +70,8 @@ def distance_center_of_mass(centers, draw, unit_dir):
                                                      centers[unit_2])
 
     # drawing distances
-    # if draw:
-    #     utils.draw_distance_center_of_mass(centers)
+    if draw:
+        utils.draw_distance_center_of_mass(centers)
 
     return distances
 
@@ -100,8 +100,8 @@ def distance_alpha_c(centers, draw, unit_dir):
                                                              center)
 
         # drawing distances
-        # if draw:
-        #     utils.draw_distance_center_mass_alpha(unit, center, alpha_c)
+        if draw:
+            utils.draw_distance_center_mass_alpha(unit, center, alpha_c)
 
     return distances
 
@@ -125,17 +125,17 @@ def handedness(centers, draw, unit_dir):
         alpha_c = alpha_carbon(structure)
         ca_1 = alpha_c[0]
         ca_2 = alpha_c[1]
-        v_1 = np.array(ca_1.get_coord()) - np.array(centers[unit])
-        v_2 = np.array(ca_2.get_coord()) - np.array(centers[unit])
+        x = np.array(ca_1.get_coord()) - np.array(centers[unit])
+        v = np.array(ca_2.get_coord()) - np.array(centers[unit])
         y = np.array(centers[unit])
         if i != len(centers)-1:
             y = y + np.array(centers[unit_dir_list[i+1]]) 
         if i == len(centers)-1:
             y = 1 - (y + np.array(centers[unit_dir_list[i-1]]))
-        z = np.cross(y, v_1)
-        v_1_trans = np.linalg.solve(np.array([v_1, y, z]).T, v_1)
-        v_2_trans = np.linalg.solve(np.array([v_1, y, z]).T, v_2)
-        hand = np.cross(v_1_trans, v_2_trans)[2]
+        z = np.cross(y, x)
+        x_trans = np.linalg.solve(np.array([x, y, z]).T, x)
+        v_trans = np.linalg.solve(np.array([x, y, z]).T, v)
+        hand = np.cross(x_trans, v_trans)[2]
         
         if hand >= 0:
             handedness[unit] = "R"
@@ -143,9 +143,9 @@ def handedness(centers, draw, unit_dir):
             handedness[unit] = "L"
 
         # drawing vector used to compute handedness
-        # if draw:
-        #     utils.draw_vector(list(ca_1.get_coord()), list(centers[unit]))
-        #     utils.draw_vector(list(ca_2.get_coord()), list(centers[unit]))
+        if draw:
+            utils.draw_vector(list(ca_1.get_coord()), list(centers[unit]))
+            utils.draw_vector(list(ca_2.get_coord()), list(centers[unit]))
 
     return handedness
 
@@ -184,13 +184,13 @@ def twist(centers, draw, unit_dir):
         sqrt_2 = np.sqrt(np.sum(v_2**2))
         angle = prod_sum_wise/(sqrt_1*sqrt_2)
         np.degrees(np.arccos(angle))
-        twist[unit_1] = angle
+        twist[unit_1 + '_' + unit_2] = angle
 
         #  drawing vector used to compute twist
-        # if draw:
-        #     utils.draw_vector(list(ca_1), list(ca_2))
-        #     utils.draw_vector(list(center_1), list(ca_1))
-        #     utils.draw_vector(list(center_2), list(ca_2))
+        if draw:
+            utils.draw_vector(list(ca_1), list(ca_2))
+            utils.draw_vector(list(center_1), list(ca_1))
+            utils.draw_vector(list(center_2), list(ca_2))
 
     return twist
 
@@ -231,7 +231,8 @@ def curvature(centers, draw, unit_dir):
     curvature = {}
     for i in range(len(centers)-2):
         v_1, v_2, v_3 = aux(i, centers, draw, unit_dir)
-        curvature[unit_dir_list[i] + '_' + unit_dir_list[i+1]] = angle(v_2, v_3)
+        curvature[unit_dir_list[i] +
+                  '_' + unit_dir_list[i+1]] = angle(v_2, v_3)
 
     return curvature
 
@@ -306,23 +307,17 @@ def aux(i, centers, draw, unit_dir):
     center_3 = np.array(centers[unit_3])
 
     x = ca_1 - center_1
-    # v_1 /= np.linalg.norm(v_1)
     y = center_2 - center_1
-    # v_2 /= np.linalg.norm(v_2)
     v = center_3 - center_2
-    # v_3 /= np.linalg.norm(v_3)
     z = np.cross(x, y)
-    # v_4 /= np.linalg.norm(v_4)
 
     x_trans = np.linalg.solve(np.array([x, y, z]), x)
-    # v_1_trans /= np.linalg.norm(v_1_trans)
     y_trans = np.linalg.solve(np.array([x, y, z]), y)
-    # v_2_trans /= np.linalg.norm(v_2_trans)
     v_trans = np.linalg.solve(np.array([x, y, z]), v)
-    # v_3_trans /= np.linalg.norm(v_3_trans)
-    # if draw:
-    #     utils.draw_vector(list(center_1), list(ca_1))
-    #     utils.draw_vector(list(center_1), list(center_2))
-    #     utils.draw_vector(list(center_2), list(center_3))
+
+    if draw:
+        utils.draw_vector(list(center_1), list(ca_1))
+        utils.draw_vector(list(center_1), list(center_2))
+        utils.draw_vector(list(center_2), list(center_3))
 
     return x_trans, y_trans, v_trans
